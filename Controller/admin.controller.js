@@ -27,7 +27,7 @@ const addproduct = async (req, res, next) => {
     });
 
     const data = await newproduct.save();
-    res.status(200).json(data);
+    res.status(200).json("Product added .. ");
   } catch (error) {
     next(error);
   }

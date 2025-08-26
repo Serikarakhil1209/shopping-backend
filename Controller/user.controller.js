@@ -2,64 +2,63 @@ const { request } = require("express")
 const {addtocart} = require("../Models/addtocartschema.js")
 const {adminmodel} = require("../Models/adminschema.js")
 
-const addProdcttocart = async(req,res,next)=>{
-user_id = req.user.id // i have taken from token 
-const {product_id, quantity} = req.body
-try {
-const data = await addtocart.findOne({
-    product_id:product_id
-})
-if(data){
- 
-    const newqunatity = await addProdcttocart.findByIdAndUpdate({    product_id:product_id
-}, { $inc: { quantity: 1 } },    // increment quantity by 1
-        { new: true }    )    
-    return res.status(200).json({ "message": "Quantity updated in the cart",  newqunatity});
-}
+const addProdcttocart = async (req, res, next) => {
+    const user_id = req.user.id; // taken from token
+    const { quantity, size, product_id } = req.body;
 
-const newdata = new addtocart({
-    user_id:user_id,
-    product_id:product_id,
-    quantity:quantity
-})
+    try {
+        
+        const data = await addtocart.findOne({ product_id: product_id, user_id: user_id });
+        // we are checking product is precent in db or noy
+        if (data) {
+            const newQuantity = await addtocart.findOneAndUpdate(
+                { product_id: product_id, user_id: user_id },
+                { $inc: { quantity: 1 } }, // Increment quantity
+                { new: true }
+            );
 
-const newProduct = await newdata.save()
-return res.status(200).json({
-    message:"added bro",
-    newProduct
-})
+            return res.status(200).json({
+                message: "Quantity updated in the cart",
+                newQuantity
+            });
+        }
+
+        // Add new product to cart
+        const newData = new addtocart({
+            user_id: user_id,
+            product_id: product_id,
+            quantity: quantity,
+            size: size
+        });
+
+        const newProduct = await newData.save();
+        return res.status(200).json({
+            message: "Product added to the cart",
+            newProduct
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
 
 
-} catch (error) {
-   next(error) 
-}} 
+const getproducts = async (req, res, next) => {
+    try {
+        const userId = req.user.id; 
+        const cart_items = await addtocart.find({ user_id: userId })
+            .populate("product_id", ["_id", "product_name", "product", "product_category", "price", "size", "quantity", "description", "images"]);
 
-const getproducts = async(req,res,next)=>{
-products_array = []
-id = req.user.id
-try {
-    
-const cart_items = await addtocart.find({
-    user_id:id
-}).populate("product_id",["_id", "product_name", "product", "product_category", "price", "size", "quantity", "description", "images"])
+        if (cart_items.length === 0) { 
+            return res.status(200).json({ message: "Cart is empty" });
+        }
 
-console.log(cart_items)
-if(!cart_items){
-    return res.status(400).json({message:"no items"})
-}
+        return res.status(200).json(cart_items); 
+    } catch (error) {
+        next(error);
+    }
+};
 
-// for( let item of cart_items){
-//     const oneitem = await adminmodel.findOne({_id:item.product_id})
-//     products_array.push(oneitem)
-// }
-if(products_array.length === 0){
-    res.status(400).json({message:"empty cart"})
-}
-res.status(201).json(cart_items)
-} catch (error) {
-next(error)    
-}
-}
 
 const removeProduct = async(req,res,next)=>{
     const {id} = req.params

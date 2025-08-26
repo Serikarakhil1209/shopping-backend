@@ -43,7 +43,6 @@ const orderschema = mongoose.Schema({
     type:String,
     enum:["cancel"]
   },
-
   address: {
     fullname: { type: String, required: true },
     mobile: { type: String, required: true },

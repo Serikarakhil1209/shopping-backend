@@ -6,8 +6,8 @@ const adminschema = mongoose.Schema({
     product_category : {type:String,required:true},
     price:{type:String,required:true},
     size:{
-        type:String,
-        required:true
+        type:[String],
+    
     },
    description : {
     type:String,

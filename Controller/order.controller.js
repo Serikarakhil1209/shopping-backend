@@ -5,6 +5,7 @@ const { ordermodel } = require("../Models/orders.schema.js");
 const placeorder = async (req, res, next) => {
   try {
     const user_id = req.user.id;
+    const {paymentmode,upi_id,address} = req.body
 
     const cartitems = await addtocart.find({ user_id }).populate("product_id");
 
@@ -23,11 +24,14 @@ const placeorder = async (req, res, next) => {
       0
     );
 
-    const order = new ordermodel({
-      user_id,
-      products: Products,
-      total_amount,
-    });
+  const order = new ordermodel({
+  user_id,
+  products: Products,
+  total_amount,
+  paymentmode,    
+  upi_id,         
+  address     
+});
 
     await order.save();
 
@@ -47,7 +51,7 @@ const placeorder = async (req, res, next) => {
 const vieworders = async (req, res, next) => {
   try {
     const user_id = req.user.id;
-    const orders = await ordermodel.find({ user_id });
+    const orders = await ordermodel.find({ user_id:user_id });
     res.status(200).json({ orders });
   } catch (error) {
     next(error);
