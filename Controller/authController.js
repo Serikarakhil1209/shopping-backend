@@ -12,7 +12,6 @@ const signupControll = async(req,res,next)=>{
       password:decode
     })
     const user = await  data.save()
-    createToken(user)
     const token = await createToken(user)
     res.status(200).json({
       message:"signup sucessfull",
